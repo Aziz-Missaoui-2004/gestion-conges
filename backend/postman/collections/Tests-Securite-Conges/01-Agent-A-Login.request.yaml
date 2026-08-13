@@ -1,0 +1,24 @@
+$kind: http-request
+name: '01 - Agent A : Login'
+order: 1000
+method: POST
+url: '{{baseUrl}}/api/auth/login'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"email": "{{agentA_email}}", "password": "{{agentA_password}}"}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Login Agent A réussi - status 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Token JWT reçu", function () {
+          const json = pm.response.json();
+          pm.expect(json.token).to.be.a("string").and.not.empty;
+          pm.environment.set("agentA_token", json.token);
+      });

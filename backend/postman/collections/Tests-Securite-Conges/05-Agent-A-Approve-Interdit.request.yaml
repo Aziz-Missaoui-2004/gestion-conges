@@ -1,0 +1,17 @@
+$kind: http-request
+name: '05 - Agent A : Approve interdit (403)'
+order: 5000
+method: POST
+url: '{{baseUrl}}/api/leave-requests/1/approve'
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{agentA_token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Agent A ne peut pas approuver - status 403", function () {
+          pm.response.to.have.status(403);
+      });

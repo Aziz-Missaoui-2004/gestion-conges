@@ -1,0 +1,21 @@
+$kind: http-request
+name: '08 - Responsable : Reject demande Agent B (200)'
+order: 8000
+method: POST
+url: '{{baseUrl}}/api/leave-requests/{{leaveRequestId_B}}/reject'
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{responsable_token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Responsable peut rejeter - status 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Statut de la demande est REJETE", function () {
+          const json = pm.response.json();
+          pm.expect(json.statut).to.be.oneOf(["REJETE", "REJECTED", "REJETÉ"]);
+      });

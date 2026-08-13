@@ -1,0 +1,17 @@
+$kind: http-request
+name: '09 - Agent A : Annuler demande de B interdit (403)'
+order: 9000
+method: POST
+url: '{{baseUrl}}/api/leave-requests/{{leaveRequestId_B}}/cancel'
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{agentA_token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Agent A ne peut pas annuler la demande de B - status 403", function () {
+          pm.response.to.have.status(403);
+      });

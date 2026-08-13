@@ -1,0 +1,93 @@
+{
+  "info": {
+    "name": "Gestion des congés - Tests fonctionnels",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "token", "value": "" },
+    { "key": "requestId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Authentification",
+      "item": [
+        {
+          "name": "Connexion agent démo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"demo.leila@cni.tn\",\n  \"password\": \"password\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Connexion réussie', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('token', pm.response.json().token);"
+            ]}
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Agent",
+      "item": [
+        {
+          "name": "Mes demandes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/leave-requests/my", "host": ["{{baseUrl}}"], "path": ["leave-requests", "my"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Demandes accessibles', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Mon tableau de bord",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/agents/me/dashboard", "host": ["{{baseUrl}}"], "path": ["agents", "me", "dashboard"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Dashboard accessible', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Sécurité",
+      "item": [
+        {
+          "name": "Endpoint protégé sans JWT",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/leave-requests/my", "host": ["{{baseUrl}}"], "path": ["leave-requests", "my"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('JWT obligatoire', () => pm.response.to.have.status(401));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Validation hiérarchique",
+      "item": [
+        {
+          "name": "Demandes à traiter",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/leave-requests", "host": ["{{baseUrl}}"], "path": ["leave-requests"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Demandes du validateur', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Historique de mes validations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/validations/my", "host": ["{{baseUrl}}"], "path": ["validations", "my"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Historique accessible', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    }
+  ]
+}

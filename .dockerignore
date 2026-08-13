@@ -1,0 +1,6 @@
+.git
+.m2
+target
+node_modules
+dist
+*.log

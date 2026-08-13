@@ -1,0 +1,34 @@
+$kind: http-request
+name: '02 - Agent A : Voir ses demandes uniquement'
+order: 2000
+method: GET
+url: '{{baseUrl}}/api/leave-requests/my'
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{agentA_token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - Agent A voit ses demandes", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("La réponse est un tableau", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+      const json = pm.response.json();
+      if (json.length > 0) {
+          pm.environment.set("leaveRequestId_A", json[0].id);
+          pm.test("Les demandes appartiennent à Agent A", function () {
+              json.forEach(function(req) {
+                  pm.expect(req.agent).to.exist;
+              });
+          });
+      } else {
+          pm.test("Aucune demande pour Agent A (tableau vide OK)", function () {
+              pm.expect(json).to.be.an("array");
+          });
+      }

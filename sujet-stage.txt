@@ -1,0 +1,7 @@
+Titre du sujet : Conception et développement d'une application Web de gestion des congés pour la fonction publique.
+
+Conception : modélisation de la base de données relationnelle intégrant le statut de l'agent et ses droits (30 jours par année ou 2,5 jours par mois).
+
+Développement : création d'un workflow de validation hiérarchique.
+
+Fonctionnalités : tableau de bord pour l'agent, consultation du solde de congé restant et création d'une demande en ligne.

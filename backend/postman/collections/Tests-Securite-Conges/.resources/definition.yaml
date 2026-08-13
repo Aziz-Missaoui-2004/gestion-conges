@@ -1,0 +1,6 @@
+$kind: collection
+name: 'Tests Sécurité - Gestion Congés'
+description: |-
+  Collection de tests de sécurité et contrôle d'accès pour l'API de gestion des congés.
+  Couvre 5 scénarios : isolation des données par agent, interdiction d'approve pour un agent,
+  approve/reject par le responsable, et interdiction d'annuler la demande d'un autre agent.

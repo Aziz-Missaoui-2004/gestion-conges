@@ -1,0 +1,24 @@
+$kind: http-request
+name: '06 - Responsable : Login'
+order: 6000
+method: POST
+url: '{{baseUrl}}/api/auth/login'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"email": "{{responsable_email}}", "password": "{{responsable_password}}"}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Login Responsable réussi - status 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Token JWT reçu pour Responsable", function () {
+          const json = pm.response.json();
+          pm.expect(json.token).to.be.a("string").and.not.empty;
+          pm.environment.set("responsable_token", json.token);
+      });

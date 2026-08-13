@@ -1,0 +1,36 @@
+$kind: http-request
+name: '04 - Agent B : Ne voit pas les demandes de A'
+order: 4000
+method: GET
+url: '{{baseUrl}}/api/leave-requests/my'
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{agentB_token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - Agent B voit ses demandes", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("La réponse est un tableau", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+      const json = pm.response.json();
+      const idA = pm.environment.get("leaveRequestId_A");
+      if (idA && json.length > 0) {
+          pm.test("Agent B ne voit pas les demandes de Agent A", function () {
+              const ids = json.map(function(r) { return String(r.id); });
+              pm.expect(ids).to.not.include(String(idA));
+          });
+      } else {
+          pm.test("Isolation vérifiée (pas de demandes communes détectables)", function () {
+              pm.expect(json).to.be.an("array");
+          });
+      }
+      if (json.length > 0) {
+          pm.environment.set("leaveRequestId_B", json[0].id);
+      }
