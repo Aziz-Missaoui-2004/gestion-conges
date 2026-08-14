@@ -9,6 +9,7 @@ import { api } from "./services/api";
 import "./App.css";
 
 const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
+const THEME_STORAGE_PREFIX = "gestion-conges-theme-";
 
 type User = {
   userId: number;
@@ -16,6 +17,9 @@ type User = {
   role: "AGENT" | "RESPONSABLE" | "ADMIN";
   token: string;
 };
+
+const getThemeStorageKey = (email: string) =>
+  `${THEME_STORAGE_PREFIX}${email.toLowerCase()}`;
 
 function App() {
   const [user, setUser] = useState<User | null>(() => {
@@ -27,8 +31,10 @@ function App() {
   const [activeSection, setActiveSection] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminAgentsExpanded, setAdminAgentsExpanded] = useState(false);
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [superiorName, setSuperiorName] = useState("");
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -36,6 +42,15 @@ function App() {
     } else {
       localStorage.removeItem("user");
     }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setDarkMode(false);
+      return;
+    }
+
+    setDarkMode(localStorage.getItem(getThemeStorageKey(user.email)) === "dark");
   }, [user]);
 
   useEffect(() => {
@@ -124,6 +139,15 @@ function App() {
     setUser(null);
   };
 
+  const toggleDarkMode = () => {
+    const nextDarkMode = !darkMode;
+    setDarkMode(nextDarkMode);
+    localStorage.setItem(
+      getThemeStorageKey(user.email),
+      nextDarkMode ? "dark" : "light"
+    );
+  };
+
   if (!user) {
     return (
       <LoginPage
@@ -165,14 +189,22 @@ function App() {
     "#admin-balance",
     "#admin-agents-list",
   ];
+  const settingsSubsections = [
+    "#settings-confidentiality",
+    "#settings-personal-info",
+    "#settings-theme",
+  ];
   const selectedSection = adminAgentSubsections.includes(activeSection)
     ? activeSection
-    : navigation.some((item) => item.href === activeSection && item.href !== "#admin-agents")
+    : settingsSubsections.includes(activeSection)
+      ? activeSection
+      : navigation.some((item) => item.href === activeSection && item.href !== "#admin-agents")
       ? activeSection
       : navigation[0].href;
+  const isSettingsSection = settingsSubsections.includes(selectedSection);
 
   return (
-    <div className={`app-shell ${sidebarOpen ? "sidebar-open" : ""}`}>
+    <div className={`app-shell ${sidebarOpen ? "sidebar-open" : ""} ${darkMode ? "dark-mode" : ""}`}>
       <aside className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <div className="brand">
           <span className="brand-mark">GC</span>
@@ -226,9 +258,43 @@ function App() {
             );
           })}
         </nav>
-        <button className="sidebar-logout" onClick={logout}>
-          Déconnexion
-        </button>
+        <div className="sidebar-settings">
+          <div
+            className={`sidebar-settings-menu ${settingsExpanded ? "open" : ""}`}
+            aria-hidden={!settingsExpanded}
+          >
+              <a href="#settings-confidentiality" onClick={() => setSidebarOpen(false)}>
+                Confidentialité
+              </a>
+              <a href="#settings-personal-info" onClick={() => setSidebarOpen(false)}>
+                Informations personnelles
+              </a>
+              <button
+                type="button"
+                className={`theme-toggle ${darkMode ? "active" : ""}`}
+                aria-label="Activer ou désactiver le mode sombre"
+                aria-pressed={darkMode}
+                onClick={toggleDarkMode}
+              >
+                <span>Mode sombre</span>
+                <span className="theme-toggle-track" aria-hidden="true">
+                  <span className="theme-toggle-thumb" />
+                </span>
+              </button>
+              <button className="sidebar-logout" onClick={logout}>
+                Déconnexion
+              </button>
+          </div>
+          <button
+            type="button"
+            className={`nav-item nav-toggle settings-toggle ${settingsExpanded ? "active" : ""}`}
+            aria-expanded={settingsExpanded}
+            onClick={() => setSettingsExpanded((isExpanded) => !isExpanded)}
+          >
+            <span>Paramètres</span>
+            <span className="nav-arrow settings-arrow" aria-hidden="true">›</span>
+          </button>
+        </div>
       </aside>
 
       {sidebarOpen && (
@@ -256,19 +322,33 @@ function App() {
           </div>
         </header>
 
-      {user.role === "RESPONSABLE" && !selectedSection.startsWith("#agent-") && (
+      {user.role === "RESPONSABLE" && !selectedSection.startsWith("#agent-") && !isSettingsSection && (
         <ManagerDashboard
           activeSection={selectedSection}
           onPendingCountChange={setPendingRequestsCount}
         />
       )}
 
-      {user.role === "AGENT" ||
-      (user.role === "RESPONSABLE" && canRequestLeave && selectedSection.startsWith("#agent-")) ? (
+      {!isSettingsSection && (user.role === "AGENT" ||
+      (user.role === "RESPONSABLE" && canRequestLeave && selectedSection.startsWith("#agent-"))) ? (
         <AgentDashboard activeSection={selectedSection} />
       ) : null}
 
-      {user.role === "ADMIN" && <AdminDashboard activeSection={selectedSection} />}
+      {user.role === "ADMIN" && !isSettingsSection && <AdminDashboard activeSection={selectedSection} />}
+
+      {settingsSubsections.includes(selectedSection) && (
+        <div className="container settings-page">
+          <section className="card">
+            <h1>
+              {selectedSection === "#settings-confidentiality"
+                ? "Confidentialité"
+                : selectedSection === "#settings-personal-info"
+                  ? "Informations personnelles"
+                  : "Mode sombre"}
+            </h1>
+          </section>
+        </div>
+      )}
       </div>
     </div>
   );
