@@ -85,7 +85,7 @@ BEGIN
     ON CONFLICT (email) DO NOTHING;
 
     -- Création de la hiérarchie minimale nécessaire aux validations à deux niveaux.
-    SELECT id INTO resp2_id FROM agents a JOIN users u ON u.id = a.user_id
+    SELECT a.id INTO resp2_id FROM agents a JOIN users u ON u.id = a.user_id
     WHERE u.email = 'responsable2@test.com';
     IF resp2_id IS NULL THEN
         INSERT INTO agents (user_id, nom, prenom, date_embauche, service_id, responsable_direct_id)
@@ -93,7 +93,7 @@ BEGIN
         RETURNING id INTO resp2_id;
     END IF;
 
-    SELECT id INTO resp1_id FROM agents a JOIN users u ON u.id = a.user_id
+    SELECT a.id INTO resp1_id FROM agents a JOIN users u ON u.id = a.user_id
     WHERE u.email = 'responsable1@test.com';
     IF resp1_id IS NULL THEN
         INSERT INTO agents (user_id, nom, prenom, date_embauche, service_id, responsable_direct_id)
@@ -101,7 +101,7 @@ BEGIN
         RETURNING id INTO resp1_id;
     END IF;
 
-    SELECT id INTO agent_test_id FROM agents a JOIN users u ON u.id = a.user_id
+    SELECT a.id INTO agent_test_id FROM agents a JOIN users u ON u.id = a.user_id
     WHERE u.email = 'agent@test.com';
     IF agent_test_id IS NULL THEN
         INSERT INTO agents (user_id, nom, prenom, date_embauche, service_id, responsable_direct_id)
