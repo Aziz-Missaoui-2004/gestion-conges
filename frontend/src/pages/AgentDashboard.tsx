@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import axios from "axios";
 import { api } from "../services/api";
+import ExportMenu from "../components/ExportMenu";
 
 type Balance = {
   joursAcquis: number;
@@ -362,7 +363,7 @@ function AgentDashboard({ activeSection }: { activeSection: string }) {
           <p>Aucune demande.</p>
 
         ) : (
-
+          <>
           <table>
 
             <thead>
@@ -464,6 +465,21 @@ function AgentDashboard({ activeSection }: { activeSection: string }) {
 
           </table>
 
+          <ExportMenu
+            filename="mes-demandes"
+            columns={["Début", "Fin", "Jours", "Motif", "Statut", "Progression"]}
+            rows={requests.map((request) => [
+              request.dateDebut,
+              request.dateFin,
+              request.nombreJours,
+              request.motif || "-",
+              request.statut,
+              request.statut === "EN_ATTENTE"
+                ? `En attente niveau ${request.niveauValidation}`
+                : "Terminé",
+            ])}
+          />
+          </>
         )}
 
       </section>}

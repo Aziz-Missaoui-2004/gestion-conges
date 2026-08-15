@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class ValidationHistoryResponse {
     private Long validationId;
     private Long leaveRequestId;
+    private Long agentId;
     private String agentNom;
     private String agentPrenom;
     private LocalDate dateDebut;
@@ -22,6 +23,8 @@ public class ValidationHistoryResponse {
     public void setValidationId(Long validationId) { this.validationId = validationId; }
     public Long getLeaveRequestId() { return leaveRequestId; }
     public void setLeaveRequestId(Long leaveRequestId) { this.leaveRequestId = leaveRequestId; }
+    public Long getAgentId() { return agentId; }
+    public void setAgentId(Long agentId) { this.agentId = agentId; }
     public String getAgentNom() { return agentNom; }
     public void setAgentNom(String agentNom) { this.agentNom = agentNom; }
     public String getAgentPrenom() { return agentPrenom; }

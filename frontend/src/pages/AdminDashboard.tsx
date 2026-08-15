@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import axios from "axios";
 import { api } from "../services/api";
+import ExportMenu from "../components/ExportMenu";
 
 type Agent = {
   id: number;
@@ -411,6 +412,7 @@ const loadServices = async () => {
         {agents.length === 0 ? (
           <p>Aucun agent.</p>
         ) : (
+          <>
           <table className="admin-agents-table">
             <thead>
               <tr>
@@ -480,6 +482,23 @@ const loadServices = async () => {
               ))}
             </tbody>
           </table>
+
+          <ExportMenu
+            filename="agents-et-responsables"
+            columns={["Nom", "Email", "Rôle", "Statut", "Service", "Responsable direct", "Date d'embauche"]}
+            rows={agents.map((agent) => [
+              `${agent.prenom} ${agent.nom}`,
+              agent.user.email,
+              agent.user.role,
+              agent.statut,
+              agent.service?.nom ?? "-",
+              agent.responsableDirect
+                ? `${agent.responsableDirect.prenom} ${agent.responsableDirect.nom}`
+                : "-",
+              agent.dateEmbauche,
+            ])}
+          />
+          </>
         )}
       </section>}
     </div>

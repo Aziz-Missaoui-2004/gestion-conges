@@ -46,6 +46,7 @@ public class ValidationController {
         ValidationHistoryResponse response = new ValidationHistoryResponse();
         response.setValidationId(validation.getId());
         response.setLeaveRequestId(validation.getLeaveRequest().getId());
+        response.setAgentId(validation.getLeaveRequest().getAgent().getId());
         response.setAgentNom(validation.getLeaveRequest().getAgent().getNom());
         response.setAgentPrenom(validation.getLeaveRequest().getAgent().getPrenom());
         response.setDateDebut(validation.getLeaveRequest().getDateDebut());

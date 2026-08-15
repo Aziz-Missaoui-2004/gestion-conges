@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { api } from "../services/api";
+import ExportMenu from "../components/ExportMenu";
 
 type LeaveRequest = {
   id: number;
@@ -20,6 +21,7 @@ type LeaveRequest = {
 type ValidationHistory = {
   validationId: number;
   leaveRequestId: number;
+  agentId: number;
   agentNom: string;
   agentPrenom: string;
   dateDebut: string;
@@ -43,6 +45,9 @@ function ManagerDashboard({
   const [comments, setComments] = useState<Record<number, string>>({});
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error">("success");
+  const [historyView, setHistoryView] = useState<"all" | "agent">("all");
+  const [selectedHistoryAgentId, setSelectedHistoryAgentId] = useState<number | null>(null);
+  const [historyAgentSearch, setHistoryAgentSearch] = useState("");
 
   const showMessage = (text: string, type: "success" | "error") => {
     setMessage(text);
@@ -80,6 +85,18 @@ function ManagerDashboard({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (activeSection === "#manager-history-agent") {
+      setHistoryView("agent");
+      setSelectedHistoryAgentId(null);
+      setHistoryAgentSearch("");
+    } else if (activeSection === "#manager-history-all") {
+      setHistoryView("all");
+      setSelectedHistoryAgentId(null);
+      setHistoryAgentSearch("");
+    }
+  }, [activeSection]);
+
   const decide = async (id: number, decision: "approve" | "reject") => {
     try {
       await api.post(`/leave-requests/${id}/${decision}`, {
@@ -112,6 +129,20 @@ function ManagerDashboard({
   const urgentRequests = requests.filter(
     (request) => request.dateDebut >= todayString && request.dateDebut <= urgentLimitString
   );
+  const historyAgents = Array.from(
+    new Map(
+      history.map((item) => [
+        item.agentId,
+        { id: item.agentId, name: `${item.agentPrenom} ${item.agentNom}` },
+      ])
+    ).values()
+  );
+  const filteredHistoryAgents = historyAgents.filter((agent) =>
+    agent.name.toLowerCase().startsWith(historyAgentSearch.trim().toLowerCase())
+  );
+  const displayedHistory = selectedHistoryAgentId === null
+    ? history
+    : history.filter((item) => item.agentId === selectedHistoryAgentId);
 
   return (
     <div className="container">
@@ -208,12 +239,73 @@ function ManagerDashboard({
         )}
       </section>}
 
-      {activeSection === "#manager-history" && <section id="manager-history" className="card">
+      {activeSection.startsWith("#manager-history") && <section id="manager-history" className="card manager-history-card">
         <h2>Historique de mes validations</h2>
+        <p className="history-page-intro">
+          Retrouvez vos décisions de validation et consultez-les par agent lorsque nécessaire.
+        </p>
 
-        {history.length === 0 ? (
+        {historyView === "agent" && selectedHistoryAgentId === null && (
+          <div className="history-agent-picker">
+            {historyAgents.length === 0 ? (
+              <>
+                <h3>Sélectionner un agent</h3>
+                <p>Aucun agent ne possède encore de validation dans votre historique.</p>
+              </>
+            ) : (
+              <>
+                <label className="history-agent-search-label">
+                  Rechercher un agent
+                  <input
+                    className="history-agent-search"
+                    type="search"
+                    value={historyAgentSearch}
+                    onChange={(event) => setHistoryAgentSearch(event.target.value)}
+                    placeholder="Saisissez les premières lettres..."
+                    aria-label="Rechercher un agent par son nom"
+                  />
+                </label>
+                <h3>Sélectionner un agent</h3>
+                {filteredHistoryAgents.length === 0 ? (
+                  <p>Aucun agent ne correspond à votre recherche.</p>
+                ) : (
+                  <div className="history-agent-list">
+                    {filteredHistoryAgents.map((agent) => (
+                      <button
+                        type="button"
+                        className="history-agent-button"
+                        key={agent.id}
+                        onClick={() => setSelectedHistoryAgentId(agent.id)}
+                      >
+                        {agent.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {historyView === "agent" && selectedHistoryAgentId !== null && (
+          <div className="history-selected-agent">
+            <button
+              type="button"
+              className="history-back-button"
+              onClick={() => setSelectedHistoryAgentId(null)}
+            >
+              ← Liste des agents
+            </button>
+            <h3>
+              Historique de {historyAgents.find((agent) => agent.id === selectedHistoryAgentId)?.name}
+            </h3>
+          </div>
+        )}
+
+        {(historyView === "all" || selectedHistoryAgentId !== null) && displayedHistory.length === 0 ? (
           <p>Aucune validation effectuée.</p>
-        ) : (
+        ) : (historyView === "all" || selectedHistoryAgentId !== null) && (
+          <>
           <table>
             <thead>
               <tr>
@@ -227,7 +319,7 @@ function ManagerDashboard({
               </tr>
             </thead>
             <tbody>
-              {history.map((item) => (
+              {displayedHistory.map((item) => (
                 <tr key={item.validationId}>
                   <td>{item.agentPrenom} {item.agentNom}</td>
                   <td>{item.dateDebut} → {item.dateFin}</td>
@@ -244,6 +336,20 @@ function ManagerDashboard({
               ))}
             </tbody>
           </table>
+          <ExportMenu
+            filename={selectedHistoryAgentId === null ? "toute-l-historique" : "historique-agent"}
+            columns={["Agent", "Période", "Jours", "Niveau", "Décision", "Commentaire", "Date"]}
+            rows={displayedHistory.map((item) => [
+              `${item.agentPrenom} ${item.agentNom}`,
+              `${item.dateDebut} → ${item.dateFin}`,
+              item.nombreJours,
+              `Niveau ${item.niveau}`,
+              item.decision,
+              item.commentaire || "-",
+              new Date(item.dateDecision).toLocaleString("fr-FR"),
+            ])}
+          />
+          </>
         )}
       </section>}
     </div>

@@ -32,6 +32,7 @@ function App() {
   const [activeSection, setActiveSection] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminAgentsExpanded, setAdminAgentsExpanded] = useState(false);
+  const [managerHistoryExpanded, setManagerHistoryExpanded] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [superiorName, setSuperiorName] = useState("");
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -194,6 +195,10 @@ function App() {
     "#admin-balance",
     "#admin-agents-list",
   ];
+  const managerHistorySubsections = [
+    "#manager-history-all",
+    "#manager-history-agent",
+  ];
   const settingsSubsections = [
     "#settings-confidentiality",
     "#settings-personal-info",
@@ -201,6 +206,8 @@ function App() {
   ];
   const selectedSection = adminAgentSubsections.includes(activeSection)
     ? activeSection
+    : managerHistorySubsections.includes(activeSection)
+      ? activeSection
     : settingsSubsections.includes(activeSection)
       ? activeSection
       : navigation.some((item) => item.href === activeSection && item.href !== "#admin-agents")
@@ -218,6 +225,7 @@ function App() {
         <nav className="sidebar-nav" aria-label="Navigation principale">
           {navigation.map((item) => {
             const isAdminAgents = user.role === "ADMIN" && item.href === "#admin-agents";
+            const isManagerHistory = user.role === "RESPONSABLE" && item.href === "#manager-history";
 
             return (
               <div className="nav-group" key={item.label}>
@@ -228,6 +236,17 @@ function App() {
                     }`}
                     aria-expanded={adminAgentsExpanded}
                     onClick={() => setAdminAgentsExpanded((isExpanded) => !isExpanded)}
+                  >
+                    <span>{item.label}</span>
+                    <span className="nav-arrow" aria-hidden="true">›</span>
+                  </button>
+                ) : isManagerHistory ? (
+                  <button
+                    className={`nav-item nav-toggle ${
+                      managerHistorySubsections.includes(selectedSection) ? "active" : ""
+                    }`}
+                    aria-expanded={managerHistoryExpanded}
+                    onClick={() => setManagerHistoryExpanded((isExpanded) => !isExpanded)}
                   >
                     <span>{item.label}</span>
                     <span className="nav-arrow" aria-hidden="true">›</span>
@@ -256,6 +275,16 @@ function App() {
                     </a>
                     <a href="#admin-agents-list" onClick={() => setSidebarOpen(false)}>
                       Liste des agents
+                    </a>
+                  </div>
+                )}
+                {isManagerHistory && managerHistoryExpanded && (
+                  <div className="sidebar-subnav">
+                    <a href="#manager-history-all" onClick={() => setSidebarOpen(false)}>
+                      Tout l’historique
+                    </a>
+                    <a href="#manager-history-agent" onClick={() => setSidebarOpen(false)}>
+                      Historique par agent
                     </a>
                   </div>
                 )}
