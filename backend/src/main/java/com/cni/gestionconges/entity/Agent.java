@@ -23,6 +23,8 @@ public class Agent {
 
     private LocalDate dateEmbauche;
 
+    private String telephone;
+
     @Enumerated(EnumType.STRING)
     private AgentStatus statut = AgentStatus.ACTIF;
 
@@ -72,6 +74,14 @@ public class Agent {
 
     public void setDateEmbauche(LocalDate dateEmbauche) {
         this.dateEmbauche = dateEmbauche;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
     }
 
     public AgentStatus getStatut() {

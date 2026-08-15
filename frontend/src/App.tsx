@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import AgentDashboard from "./pages/AgentDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import PersonalInfoPage from "./pages/PersonalInfoPage";
 import { api } from "./services/api";
 
 import "./App.css";
@@ -140,6 +141,10 @@ function App() {
   };
 
   const toggleDarkMode = () => {
+    if (!user) {
+      return;
+    }
+
     const nextDarkMode = !darkMode;
     setDarkMode(nextDarkMode);
     localStorage.setItem(
@@ -337,17 +342,22 @@ function App() {
       {user.role === "ADMIN" && !isSettingsSection && <AdminDashboard activeSection={selectedSection} />}
 
       {settingsSubsections.includes(selectedSection) && (
-        <div className="container settings-page">
-          <section className="card">
-            <h1>
-              {selectedSection === "#settings-confidentiality"
-                ? "Confidentialité"
-                : selectedSection === "#settings-personal-info"
-                  ? "Informations personnelles"
+        selectedSection === "#settings-personal-info" ? (
+          <PersonalInfoPage
+            user={user}
+            onUserUpdated={(updatedUser) => setUser(updatedUser)}
+          />
+        ) : (
+          <div className="container settings-page">
+            <section className="card">
+              <h1>
+                {selectedSection === "#settings-confidentiality"
+                  ? "Confidentialité"
                   : "Mode sombre"}
-            </h1>
-          </section>
-        </div>
+              </h1>
+            </section>
+          </div>
+        )
       )}
       </div>
     </div>

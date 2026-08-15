@@ -76,6 +76,8 @@ public class AdminController {
         User user = new User();
 
         user.setEmail(request.getEmail());
+        user.setNom(request.getNom());
+        user.setPrenom(request.getPrenom());
 
         user.setPassword(
                 passwordEncoder.encode(request.getPassword())

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { FormEvent } from "react";
+import { useRef, useState } from "react";
+import type { FormEvent, PointerEvent } from "react";
 import { api } from "../services/api";
 
 type LoginResponse = {
@@ -14,9 +14,26 @@ type Props = {
 };
 
 function LoginPage({ onLogin }: Props) {
+  const loginPageRef = useRef<HTMLDivElement>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const centerX = bounds.left + bounds.width / 2;
+    const centerY = bounds.top + bounds.height / 2;
+    const offsetX = (event.clientX - centerX) * 0.05;
+    const offsetY = (event.clientY - centerY) * 0.05;
+
+    loginPageRef.current?.style.setProperty("--cursor-x", `${offsetX}px`);
+    loginPageRef.current?.style.setProperty("--cursor-y", `${offsetY}px`);
+  };
+
+  const handlePointerLeave = () => {
+    loginPageRef.current?.style.setProperty("--cursor-x", "0px");
+    loginPageRef.current?.style.setProperty("--cursor-y", "0px");
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -35,7 +52,24 @@ function LoginPage({ onLogin }: Props) {
   };
 
   return (
-    <div className="login-page">
+    <div
+      ref={loginPageRef}
+      className="login-page"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+    >
+
+      <div className="login-particles" aria-hidden="true">
+        <span className="login-particle" />
+        <span className="login-particle" />
+        <span className="login-particle" />
+        <span className="login-particle" />
+        <span className="login-particle" />
+        <span className="login-particle" />
+        <span className="login-particle" />
+        <span className="login-particle" />
+        <span className="login-particle" />
+      </div>
 
       <div className="login-card">
 
