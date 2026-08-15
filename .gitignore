@@ -1,1 +1,53 @@
+# IDE and local assistant files
 .idea/
+.vscode/
+.agents/
+.codex/
+*.iml
+
+# Frontend generated files and dependencies
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/coverage/
+frontend/*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# Backend generated files and local Maven cache
+backend/target/
+backend/.m2/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/*.log
+
+# JavaScript and system files
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# LaTeX generated files (keep .tex and .pdf documents)
+rapport-stage/*.aux
+rapport-stage/*.fdb_latexmk
+rapport-stage/*.fls
+rapport-stage/*.log
+rapport-stage/*.out
+rapport-stage/*.synctex.gz
+rapport-stage/*.toc
+rapport-stage/*.lof
+rapport-stage/*.lot
+
+# Database exports and local backups
+*.dump
+*.backup
+*.sql.gz
