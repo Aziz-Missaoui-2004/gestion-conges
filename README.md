@@ -18,6 +18,7 @@ The main engineering challenge was not simple CRUD. The application had to repre
 - Used BCrypt password hashing and validation at the API layer.
 - Built a React + TypeScript frontend with role-specific dashboards.
 - Containerized the frontend, backend and PostgreSQL database with Docker Compose.
+- Externalized JWT and database configuration through environment variables.
 - Added reproducible demo data and local setup scripts for Linux, Windows and macOS.
 
 ## Technology stack
@@ -66,12 +67,11 @@ Examples of authorization rules:
 - approval and rejection endpoints → `RESPONSABLE`
 - personal leave-request and balance endpoints → `AGENT` or `RESPONSABLE`
 
-Passwords are hashed with BCrypt before storage.
+Passwords are hashed with BCrypt before storage. JWT signing material is supplied through the `JWT_SECRET` environment variable rather than being stored in source code.
 
 ## Architecture
 
-![Architecture](<schema-conges.png>)
-
+![Architecture](schema-conges.png)
 
 Docker Compose starts the three application layers together and waits for the PostgreSQL health check before starting the backend.
 
@@ -104,6 +104,7 @@ gestion-conges/
 │   └── Dockerfile
 ├── docs/                  # Project documentation
 ├── rapport-stage/         # Internship report material
+├── .env.example           # Local configuration template
 ├── docker-compose.yml
 ├── install.sh
 ├── seed-demo.sh
@@ -113,6 +114,20 @@ gestion-conges/
 ## Run locally
 
 Docker Desktop or Docker Engine with Docker Compose is required.
+
+First create the local environment file:
+
+```bash
+cp .env.example .env
+```
+
+Generate a JWT secret and place it in `.env`:
+
+```bash
+openssl rand -base64 48
+```
+
+The real `.env` file is ignored by Git and must not be committed.
 
 ### Linux
 
@@ -124,6 +139,7 @@ sudo sh seed-demo.sh
 ### Windows PowerShell
 
 ```powershell
+Copy-Item .env.example .env
 docker compose up --build -d
 Get-Content .\backend\demo-data.sql -Raw | docker compose exec -T database psql -U gestion_conges -d gestion_conges
 ```
