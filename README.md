@@ -70,22 +70,8 @@ Passwords are hashed with BCrypt before storage.
 
 ## Architecture
 
-```text
-                         ┌──────────────────────┐
-                         │ React / TypeScript   │
-                         │ Vite + Nginx         │
-                         └──────────┬───────────┘
-                                    │ REST / JWT
-                         ┌──────────▼───────────┐
-                         │ Spring Boot API      │
-                         │ Security · MVC · JPA │
-                         └──────────┬───────────┘
-                                    │
-                         ┌──────────▼───────────┐
-                         │ PostgreSQL 16        │
-                         │ Persistent volume    │
-                         └──────────────────────┘
-```
+![Architecture](<schema-conges.png>)
+
 
 Docker Compose starts the three application layers together and waits for the PostgreSQL health check before starting the backend.
 
