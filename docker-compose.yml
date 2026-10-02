@@ -2,13 +2,13 @@ services:
   database:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: gestion_conges
-      POSTGRES_USER: gestion_conges
-      POSTGRES_PASSWORD: gestion_conges_local
+      POSTGRES_DB: ${POSTGRES_DB:-gestion_conges}
+      POSTGRES_USER: ${POSTGRES_USER:-gestion_conges}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gestion_conges_local}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gestion_conges -d gestion_conges"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gestion_conges} -d ${POSTGRES_DB:-gestion_conges}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -16,11 +16,12 @@ services:
   backend:
     build: ./backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/gestion_conges
-      SPRING_DATASOURCE_USERNAME: gestion_conges
-      SPRING_DATASOURCE_PASSWORD: gestion_conges_local
+      DB_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-gestion_conges}
+      DB_USER: ${POSTGRES_USER:-gestion_conges}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-gestion_conges_local}
+      JWT_SECRET: ${JWT_SECRET:?Create a .env file from .env.example and set JWT_SECRET}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_SHOW_SQL: "false"
+      JPA_SHOW_SQL: "false"
     depends_on:
       database:
         condition: service_healthy
